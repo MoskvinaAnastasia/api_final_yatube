@@ -7,6 +7,7 @@ from rest_framework.pagination import LimitOffsetPagination
 from posts.models import Group, Post, Follow
 from api.serializers import (GroupSerializer, PostSerializer,
                              CommentSerializer, FollowSerializer)
+from .permissions import CustomPermission
 
 
 class UpdateDestroyMixin:
@@ -39,6 +40,7 @@ class PostViewSet(UpdateDestroyMixin, viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     pagination_class = LimitOffsetPagination
+    permission_classes = (CustomPermission,)
 
     def perform_create(self, serializer):
         """Создает новый пост."""
@@ -51,6 +53,7 @@ class CommentViewSet(UpdateDestroyMixin, viewsets.ModelViewSet):
     Создание, получение, обновление и удаление комментариев.
     """
     serializer_class = CommentSerializer
+    permission_classes = (CustomPermission,)
 
     def get_post(self):
         """
@@ -75,3 +78,4 @@ class CommentViewSet(UpdateDestroyMixin, viewsets.ModelViewSet):
 class FollowViewSet(viewsets.ModelViewSet):
     queryset = Follow.objects.all()
     serializer_class = FollowSerializer
+    permission_classes = (CustomPermission,)
