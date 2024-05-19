@@ -7,8 +7,8 @@ from rest_framework import filters
 from rest_framework import permissions
 
 from posts.models import Group, Post, Follow
-from api.serializers import (GroupSerializer, PostSerializer,
-                             CommentSerializer, FollowSerializer)
+from api.serializers import (GroupSerializer, CommentSerializer,
+                             PostSerializer, FollowSerializer)
 from .permissions import CustomPermission, ReadOnly
 
 
