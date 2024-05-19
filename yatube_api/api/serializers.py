@@ -1,4 +1,6 @@
+from django.contrib.auth.models import User
 from rest_framework import serializers
+from rest_framework.validators import UniqueTogetherValidator
 
 from posts.models import Comment, Group, Post, Follow
 
@@ -38,7 +40,28 @@ class CommentSerializer(serializers.ModelSerializer):
 
 
 class FollowSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Follow."""
+    """Сериализатор модели Follow."""
+    user = serializers.SlugRelatedField(
+        read_only=True,
+        slug_field='username',
+        default=serializers.CurrentUserDefault()
+    )
+    following = serializers.SlugRelatedField(
+        queryset=User.objects.all(), slug_field='username'
+    )
+
     class Meta:
+        fields = ('id', 'user', 'following')
         model = Follow
-        fields = ('user', 'following')
+        validators = [
+            UniqueTogetherValidator(
+                queryset=Follow.objects.all(),
+                fields=('user', 'following')
+            )
+        ]
+
+    def validate_following(self, value):
+        user = self.context['request'].user
+        if value == user:
+            raise serializers.ValidationError('Выберите другого пользователя.')
+        return value
