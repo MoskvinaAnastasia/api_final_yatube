@@ -1,51 +1,22 @@
 from django.shortcuts import get_object_or_404
 
-from rest_framework import viewsets
-from rest_framework.exceptions import PermissionDenied
+from rest_framework import filters, permissions, viewsets
+from rest_framework.mixins import CreateModelMixin, ListModelMixin
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework import filters
-from rest_framework import permissions
 
-from posts.models import Group, Post, Follow
-from api.serializers import (GroupSerializer, CommentSerializer,
-                             PostSerializer, FollowSerializer)
-from .permissions import CustomPermission, ReadOnly
+from posts.models import Follow, Group, Post
+from .permissions import IsAuthorOrReadOnly
+from .serializers import (CommentSerializer, FollowSerializer, 
+                          GroupSerializer, PostSerializer)
 
 
-class UpdateDestroyMixin:
-    """
-    Миксин для обновления и удаления объектов.
-    """
-    def perform_update(self, serializer):
-        """Обновляет существующий объект."""
-        if serializer.instance.author != self.request.user:
-            raise PermissionDenied('Изменение чужого контента запрещено!')
-        super().perform_update(serializer)
-
-    def perform_destroy(self, instance):
-        """Удаляет существующий объект."""
-        if instance.author != self.request.user:
-            raise PermissionDenied('Удаление чужого контента запрещено!')
-        instance.delete()
-
-
-class ReadOnlyMixin:
-    """
-    Миксин для установки прав доступа только на чтение (GET).
-    """
-    def get_permissions(self):
-        if self.action == 'retrieve':
-            return (ReadOnly(),)
-        return super().get_permissions()
-
-
-class GroupViewSet(ReadOnlyMixin, viewsets.ReadOnlyModelViewSet):
+class GroupViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = Group.objects.all()
     serializer_class = GroupSerializer
-    permission_classes = (CustomPermission,)
+    permission_classes = (IsAuthorOrReadOnly,)
 
 
-class PostViewSet(UpdateDestroyMixin, ReadOnlyMixin, viewsets.ModelViewSet):
+class PostViewSet(viewsets.ModelViewSet):
     """
     ViewSet для управления постами.
     Создание, получение, обновление и удаление постов.
@@ -53,19 +24,19 @@ class PostViewSet(UpdateDestroyMixin, ReadOnlyMixin, viewsets.ModelViewSet):
     queryset = Post.objects.all()
     serializer_class = PostSerializer
     pagination_class = LimitOffsetPagination
-    permission_classes = (CustomPermission,)
+    permission_classes = (IsAuthorOrReadOnly,)
 
     def perform_create(self, serializer):
         serializer.save(author=self.request.user)
 
 
-class CommentViewSet(UpdateDestroyMixin, ReadOnlyMixin, viewsets.ModelViewSet):
+class CommentViewSet(viewsets.ModelViewSet):
     """
     ViewSet для управления комментариями.
     Создание, получение, обновление и удаление комментариев.
     """
     serializer_class = CommentSerializer
-    permission_classes = (CustomPermission,)
+    permission_classes = (IsAuthorOrReadOnly,)
 
     def get_post(self):
         """
@@ -87,7 +58,7 @@ class CommentViewSet(UpdateDestroyMixin, ReadOnlyMixin, viewsets.ModelViewSet):
         return post.comments.all()
 
 
-class FollowViewSet(viewsets.ModelViewSet):
+class FollowViewSet(ListModelMixin, CreateModelMixin, viewsets.GenericViewSet):
     """
      ViewSet для управления подписками.
     Создание, получение, обновление и удаление подписок пользователей.

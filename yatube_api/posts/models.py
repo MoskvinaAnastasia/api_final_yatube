@@ -1,5 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import models
+from django.db.models import Q, UniqueConstraint, CheckConstraint
 
 User = get_user_model()
 
@@ -24,6 +25,7 @@ class Post(models.Model):
         Group, on_delete=models.SET_NULL,
         related_name='posts', blank=True, null=True
     )
+    image = models.ImageField(upload_to='post_images', blank=True, null=True)
 
     def __str__(self):
         return self.text
@@ -46,3 +48,11 @@ class Follow(models.Model):
     following = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='following'
     )
+    
+    class Meta:
+        constraints = [
+            UniqueConstraint(fields=['user', 'following'],
+                             name='unique_follow'),
+            CheckConstraint(check=~Q(user=models.F('following')),
+                            name='no_self_follow')
+        ]

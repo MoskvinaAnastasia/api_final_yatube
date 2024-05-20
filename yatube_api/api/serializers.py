@@ -1,4 +1,5 @@
 from django.contrib.auth.models import User
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -19,6 +20,7 @@ class PostSerializer(serializers.ModelSerializer):
         read_only=True,
         default=serializers.CurrentUserDefault()
     )
+    image = Base64ImageField(required=False, allow_null=True)
 
     class Meta:
         model = Post
