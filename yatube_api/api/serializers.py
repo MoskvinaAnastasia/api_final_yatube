@@ -10,7 +10,7 @@ class GroupSerializer(serializers.ModelSerializer):
     """Сериализатор для модели Group."""
     class Meta:
         model = Group
-        fields = ('id', 'title', 'description', 'slug')
+        fields = ('id', 'description', 'title', 'slug')
 
 
 class PostSerializer(serializers.ModelSerializer):
