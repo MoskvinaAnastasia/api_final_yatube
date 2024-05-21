@@ -14,7 +14,7 @@ django-filter==23.1
 django-templated-mail==1.1.1
 djangorestframework==3.12.4
 djangorestframework-serializer-extensions==2.0.1
-djangorestframework-simplejwt==4.7.2
+djangorestframework-simplejwt==5.3.1
 djoser==2.1.0
 drf-extra-fields==3.7.0
 filetype==1.2.0
