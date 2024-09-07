@@ -128,6 +128,5 @@ POST /api/v1/jwt/verify/
 ```bash
 GET /api/v1/posts/?limit=5&offset=0
 ```
-
 ## Автор проекта
 [MoskvinaAnastasia](https://github.com/MoskvinaAnastasia/)
